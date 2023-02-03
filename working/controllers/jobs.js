@@ -3,7 +3,7 @@ const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, NotFoundError } = require('../errors')
 
 const getAllJobs = async (req, res) => {
-  const { search, status, jobType } = req.query;
+  const { search, status, jobType, sort } = req.query;
 
   const queryObject = {
     createdBy: req.user.userId,
@@ -20,6 +20,19 @@ const getAllJobs = async (req, res) => {
   }
 
   let result = Job.find(queryObject);
+
+  if (sort === 'latest') {
+    result = result.sort('-createdAt');
+  }
+  if (sort === 'oldest') {
+    result = result.sort('createdAt');
+  }
+  if (sort === 'a-z') {
+    result = result.sort('position');
+  }
+  if (sort === 'z-a') {
+    result = result.sort('-position');
+  }
 
   const jobs = await result
   res.status(StatusCodes.OK).json({ jobs, count: jobs.length })
